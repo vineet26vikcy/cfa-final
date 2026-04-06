@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CFA Console by Vineet</title>
+    <style>
+        /* LIGHT THEME VARIABLES */
+        :root {
+            --blue: #3a7af2;
+            --text-main: #444444;
+            --text-light: #9b9b9b;
+            --border: #e0e0e0;
+            --bg-main: #ffffff;
+            --bg-light: #f9f9f9;
+            --empty: #ebedf0;
+            --red: #ff5252;
+            --lvl1: #9be9a8;
+            --lvl2: #40c463;
+            --lvl3: #30a14e;
+            --lvl4: #216e39;
+            --gold: #ffca28;
+            --frame-yellow-bg: #fffde7;
+            --frame-green-bg: #f1f8e9;
+            --modal-overlay: rgba(0,0,0,0.6);
+        }
+
+        /* DARK THEME VARIABLES */
+        body.dark-theme {
+            --blue: #539bf5;
+            --text-main: #c9d1d9;
+            --text-light: #8b949e;
+            --border: #30363d;
+            --bg-main: #0d1117;
+            --bg-light: #161b22;
+            --empty: #161b22;
+            --red: #da3633;
+            --lvl1: #0e4429;
+            --lvl2: #006d32;
+            --lvl3: #26a641;
+            --lvl4: #39d353;
+            --gold: #d4a72c;
+            --frame-yellow-bg: #2d260e;
+            --frame-green-bg: #122b1c;
+            --modal-overlay: rgba(0,0,0,0.8);
+        }
+
+        /* Dark mode filter for the logo if it has a white background */
+        body.dark-theme .logo-img {
+            filter: brightness(0.9) contrast(1.2);
+            background-color: white; /* Keeps logo legible if it has dark text */
+            border-radius: 4px;
+            padding: 2px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+            background-color: var(--bg-main);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 40px;
+            border-bottom: 1px solid var(--border);
+            background-color: var(--bg-main);
+        }
+        .logo {
+            color: var(--blue);
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            font-size: 14px;
+            color: var(--text-main);
+            align-items: center;
+        }
+        .nav-links span {
+            cursor: pointer;
+            padding-bottom: 18px;
+            margin-bottom: -18px;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+        .nav-links .active {
+            color: var(--blue);
+            border-bottom: 2px solid var(--blue);
+        }
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-main);
+            padding: 5px;
+            border-radius: 50%;
+        }
+        .theme-toggle:hover {
+            background-color: var(--bg-light);
+        }
+        .account {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+            background-color: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* Main Content Container */
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-img {
+            height: 32px;
+            object-fit: contain;
+            transition: filter 0.3s, background-color 0.3s;
+        }
+
+        /* Heatmap */
+        .heatmap-container {
+            display: flex;
+            flex-direction: column;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            direction: ltr; 
+            -webkit-overflow-scrolling: touch; 
+        }
+        .heatmap-inner {
+            display: inline-flex;
+            flex-direction: row;
+        }
+        .days-of-week {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            font-size: 10px;
+            color: var(--text-light);
+            text-align: right;
+            padding-right: 8px;
+            padding-top: 20px; 
+        }
+        .days-of-week span {
+            height: 13px;
+            line-height: 13px;
+        }
+        .heatmap-cols-wrapper {
+            display: flex;
+            gap: 3px;
+            padding-top: 20px; 
+        }
+        .heatmap-col {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            position: relative;
+        }
+        .month-label {
+            position: absolute;
+            top: -20px;
+            left: 0;
+            font-size: 11px;
+            color: var(--text-light);
+            white-space: nowrap;
+        }
+        
+        .square, .info-btn {
+            position: relative;
+        }
+        .square:hover::after, .info-btn:hover::after, .info-btn:active::after {
+            content: attr(data-info);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 100;
+            margin-bottom: 4px;
+        }
+        
+        .square {
+            width: 13px;
+            height: 13px;
+            background-color: var(--empty);
+            border-radius: 2px;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 15px;
+            margin-left: 35px;
+        }
+        .legend-box {
+            width: 13px;
+            height: 13px;
+            border-radius: 2px;
+        }
+
+        /* Syllabus Checklist */
+        .syllabus {
+            margin-top: 40px;
+        }
+        .subject-group {
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: var(--bg-main);
+        }
+        .subject-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--blue);
+            padding: 15px 20px;
+            background-color: var(--bg-light);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        
+        .subject-header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        .subject-progress-container {
+            width: 100px;
+            height: 6px;
+            background-color: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            display: flex;
+        }
+        .subject-progress-bar {
+            height: 100%;
+            background-color: var(--blue);
+            transition: width 0.4s ease, background-color 0.4s ease;
+            width: 0%;
+        }
+        .subject-pct {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 400;
+            width: 40px;
+        }
+
+        .topic-list {
+            display: none; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            background-color: var(--bg-main);
+            border-top: 1px solid var(--border);
+        }
+        .topic-list.active {
+            display: grid;
+        }
+        .topic-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text-main);
+            cursor: pointer;
+            width: 100%;
+            padding: 8px;
+            border: 2px solid transparent; 
+            border-radius: 6px;
+            transition: border 0.3s ease, background-color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        .frame-yellow {
+            border: 2px solid var(--gold) !important;
+            background-color: var(--frame-yellow-bg);
+        }
+        .frame-green {
+            border: 2px solid var(--lvl2) !important;
+            background-color: var(--frame-green-bg);
+        }
+
+        input[type="checkbox"] {
+            accent-color: var(--blue);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .arrow {
+            font-size: 12px;
+            transition: transform 0.2s ease;
+            color: var(--text-light);
+        }
+        .arrow.open {
+            transform: rotate(180deg);
+        }
+        .topic-name {
+            transition: color 0.2s, text-decoration 0.2s;
+            line-height: 1.4;
+        }
+        .completed-text {
+            text-decoration: line-through;
+            color: var(--text-light);
+        }
+        .info-btn {
+            display: none; 
+            margin-left: auto; 
+            cursor: pointer; 
+            color: var(--blue);
+            font-weight: bold;
+            font-size: 16px;
+            padding: 0 10px;
+        }
+
+        /* Tracker View Styles */
+        #tracker-view {
+            display: none; 
+        }
+        .review-container {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .review-box {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--bg-main);
+            padding: 20px;
+            min-height: 300px;
+        }
+        .review-box-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .review-box-header span.badge {
+            background-color: var(--blue);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .review-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .review-item:hover {
+            background-color: var(--bg-light);
+        }
+        .empty-state {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+            padding: 40px 0;
+            font-style: italic;
+        }
+
+        /* Button & Modal Styles */
+        .plan-btn {
+            background-color: var(--blue);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--modal-overlay);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-content {
+            background: var(--bg-main);
+            padding: 25px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: var(--text-main);
+            font-size: 18px;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+        .plan-day {
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        .plan-day:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .plan-date {
+            font-weight: 600;
+            color: var(--blue);
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+        .plan-section {
+            margin-bottom: 10px;
+        }
+        .plan-section strong {
+            font-size: 13px;
+            color: var(--text-main);
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+        .plan-section ul {
+            margin: 0;
+            padding-left: 20px;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+        .plan-section ul li {
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            .nav-links {
+                width: 100%;
+                overflow-x: auto;
+                padding-top: 15px;
+                padding-bottom: 5px;
+                -webkit-overflow-scrolling: touch;
+            }
+            .nav-links span {
+                padding-bottom: 10px;
+                margin-bottom: 0;
+            }
+            .review-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .subject-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .subject-header-left {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .arrow {
+                align-self: flex-end;
+                margin-top: -25px;
+            }
+            .topic-list {
+                grid-template-columns: 1fr;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .plan-btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <script>
+        if (localStorage.getItem('cfa_theme') === 'dark') {
+            document.body.classList.add('dark-theme');
+        }
+    </script>
+
+    <div class="navbar">
+        <div class="logo">CFA Console</div>
+        <div class="nav-right">
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
+            <div class="account">
+                <div class="avatar">V</div>
+                <span style="font-size: 14px; font-weight: 500;">Vineet</span>
+            </div>
+        </div>
+        <div class="nav-links">
+            <span class="active" id="nav-dashboard">Dashboard</span>
+            <span id="nav-tracker">1-4-7 Rule</span>
+            <span>Analytics</span>
+        </div>
+    </div>
+
+    <div class="container" id="dashboard-view">
+        <div class="page-title" style="margin-bottom: 30px;">
+            <img src="download (5).png" alt="CFA Logo" class="logo-img"> 
+            CFA Progress Tracker
+        </div>
+
+        <div class="heatmap-container">
+            <div class="heatmap-inner">
+                <div class="days-of-week">
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                    <span>Sun</span>
+                </div>
+                <div class="heatmap-cols-wrapper" id="heatmap-cols"></div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <span>Empty</span>
+            <div class="legend-box" style="background-color: var(--empty);"></div>
+            <span style="margin-left: 10px;">Missed</span>
+            <div class="legend-box" style="background-color: var(--red);"></div>
+            <span style="margin-left: 10px;">Completed</span>
+            <div class="legend-box" style="background-color: var(--lvl1);"></div>
+            <div class="legend-box" style="background-color: var(--lvl2);"></div>
+            <div class="legend-box" style="background-color: var(--lvl3);"></div>
+            <div class="legend-box" style="background-color: var(--lvl4);"></div>
+        </div>
+
+        <div class="syllabus" id="syllabus-container">
+            </div>
+    </div>
+
+    <div class="container" id="tracker-view">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title" style="margin-bottom: 5px;">
+                    🧠 1-4-7 Spaced Repetition
+                </h1>
+                <p style="color: var(--text-light); font-size: 13px; margin: 0; line-height: 1.4;">
+                    Check topics 3 and 6 days after completion to frame them in gold and green.
+                </p>
+            </div>
+            <button class="plan-btn" onclick="generatePlanTillSunday()">📅 Plan till Sunday</button>
+        </div>
+
+        <div class="review-container">
+            <div class="review-box">
+                <div class="review-box-header">
+                    <span>4th Day Review</span>
+                    <span class="badge" id="badge-day4" style="background-color: var(--gold); color: #333;">0</span>
+                </div>
+                <div id="list-day4"></div>
+            </div>
+
+            <div class="review-box">
+                <div class="review-box-header">
+                    <span>7th Day Review</span>
+                    <span class="badge" id="badge-day7" style="background-color: var(--lvl2);">0</span>
+                </div>
+                <div id="list-day7"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="plan-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🗓️ Revision Plan</h3>
+                <button class="close-btn" onclick="closePlanModal()">✖</button>
+            </div>
+            <div id="plan-content">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const CFA_SYLLABUS = {
+            "Quants": [
+                "1.0 - Time Value of Money", "1.1 - Rates and Returns", 
+                "1.2 - TVM for Finance", "1.3 - PreRequisites", 
+                "1.4 - Probability", "1.5 - Portfolio Mathematics",
+                "1.6 - Probability Distributions", "1.7 - Simulation Methods",
+                "1.8 - Estimation Inference", "1.9 - Hypothesis Testing",
+                "1.9B - Linear Regression", "1.9C - Intro to Big Data"
+            ],
+            "FSA": [
+                "2.0 - Intro to FSA", "2.1 - Analyzing Income Statement", 
+                "2.2 - Analyzing Balance Sheet", "2.3 - Analyzing Cash Flow", 
+                "2.5 - Analysis of Inventories", "2.6 - Analysis of Long Term Assets",
+                "2.7 - Long Term Liabilities & Equity", "2.8 - Income Tax",
+                "2.9 - Financial Reporting Quality", "2.9A - Financial Analysis Techniques",
+                "2.9B - Intro to Financial Modeling"
+            ],
+            "Corporate Issuers": [
+                "3.1 - Organizational Structure", "3.2 - Investors and Stakeholders", 
+                "3.3 - Corporate Governance", "3.4 - Working Capital and Liquidity",
+                "3.5 - Capital Invt and Allocation", "3.6 - Capital Structure",
+                "3.7 - Business Model"
+            ],
+            "Alternative Investments": [
+                "4.1 - Features, Methods, Structure", "4.2 - Performance and Returns", 
+                "4.3 - Invt in Private Debt and Equity", "4.4 - Real Estate and Infra",
+                "4.5 - Natural Resources", "4.6 - Hedge Funds", "4.7 - Digital Assets"
+            ],
+            "Economics": [
+                "5.0 - Micro Prerequisites", "5.1 - Firm Structure and Markets", 
+                "5.2 - Macro Prerequisites", "5.3 - Business Cycles",
+                "5.4 - Fiscal Policy", "5.5 - Monetary Policy", "5.6 - Intro to Geopolitics",
+                "5.7 - International Trade and FX", "5.8 - Capital Flow and FX"
+            ],
+            "Equity Investments": [
+                "6.1 - Mkt Organization and Structure", "6.2 - Index Securities", 
+                "6.3 - Market Efficiency", "6.4 - Overview of Equities",
+                "6.5 - Company Analysis", "6.6 - Industry Analysis", "6.7 - Forecasting",
+                "6.8 - Valuation Concepts and Tools"
+            ],
+            "Portfolio Management": [
+                "7.1 - Risk and Returns - One", "7.2 - Risk and Returns - Two",
+                "7.3 - Portfolio Mgmt Overview", "7.4 - Basic Portfolio Planning",
+                "7.5 - Behavioural Biases", "7.6 - Intro to Risk Mgmt"
+            ],
+            "Fixed Income": [
+                "8.1 - Fixed Income Instruments", "8.2 - Fixed Income CF and Types",
+                "8.3 - Trading and Issuance", "8.4 - Fixed Income - Pvt Issuers",
+                "8.5 - Fixed Income Govt Issuers", "8.6 - FI Valuation - Yield and Price",
+                "8.7 - Yield and Spread Measures", "8.8 - Term Structure Yield Curve",
+                "8.9 - Interest Rate Risk and Return", "8.9a - Yield Based Duration",
+                "8.9b - Curve Based Measures", "8.9c - Credit Risk", "8.9g - Securitization"
+            ],
+            "Derivatives": [
+                "9.0 - Intro to Derivatives", "9.1 - Derivatives Instruments",
+                "9.2 - Fwd Commitment and Contingent Claim", "9.3 - Derivatives Features",
+                "9.4 - Derivative Arbitrage", "9.5 - Pricing Fwd",
+                "9.6 - Value & Pricing Futures", "9.7 - Value & Pricing Swaps",
+                "9.8 - Value & Pricing Options", "9.9 - Option Replication PCP"
+            ],
+            "Ethics": [
+                "10.1 - Ethics and Trust", "10.2 - Code and Standards",
+                "10.3 - Standards", "10.4 - GIPS"
+            ]
+        };
+
+        // Dark Theme Logic
+        const themeBtn = document.getElementById('theme-btn');
+        function updateThemeIcon() {
+            themeBtn.innerText = document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
+        }
+        updateThemeIcon();
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('cfa_theme', isDark ? 'dark' : 'light');
+            updateThemeIcon();
+        }
+
+        // UI Navigation Logic
+        const navDashboard = document.getElementById('nav-dashboard');
+        const navTracker = document.getElementById('nav-tracker');
+        const viewDashboard = document.getElementById('dashboard-view');
+        const viewTracker = document.getElementById('tracker-view');
+
+        navDashboard.addEventListener('click', () => {
+            navDashboard.classList.add('active');
+            navTracker.classList.remove('active');
+            viewDashboard.style.display = 'block';
+            viewTracker.style.display = 'none';
+            renderChecklist(); 
+        });
+
+        navTracker.addEventListener('click', () => {
+            navTracker.classList.add('active');
+            navDashboard.classList.remove('active');
+            viewTracker.style.display = 'block';
+            viewDashboard.style.display = 'none';
+            renderTrackerView(); 
+        });
+
+        function getLocalYMD(dateObj) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        const getTodayStr = () => getLocalYMD(new Date());
+
+        function getDaysDiff(dateStr1, dateStr2) {
+            const d1 = new Date(dateStr1);
+            const d2 = new Date(dateStr2);
+            d1.setHours(0,0,0,0);
+            d2.setHours(0,0,0,0);
+            return Math.round((d1 - d2) / (1000 * 60 * 60 * 24));
+        }
+
+        let dailyCompletions = JSON.parse(localStorage.getItem('cfa_daily_completions')) || {};
+        let completedTopics = JSON.parse(localStorage.getItem('cfa_completed_topics')) || {};
+        let reviewStates = JSON.parse(localStorage.getItem('cfa_review_states')) || {};
+
+        function saveState() {
+            localStorage.setItem('cfa_daily_completions', JSON.stringify(dailyCompletions));
+            localStorage.setItem('cfa_completed_topics', JSON.stringify(completedTopics));
+            localStorage.setItem('cfa_review_states', JSON.stringify(reviewStates));
+        }
+
+        // Generate Plan Till Sunday
+        function generatePlanTillSunday() {
+            const planContainer = document.getElementById('plan-content');
+            planContainer.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            let daysUntilSunday = today.getDay() === 0 ? 0 : 7 - today.getDay();
+            let planHtml = '';
+
+            for (let i = 0; i <= daysUntilSunday; i++) {
+                let targetDate = new Date(today);
+                targetDate.setDate(today.getDate() + i);
+                let targetDateStr = getLocalYMD(targetDate);
+                
+                let displayDate = targetDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+                if (i === 0) displayDate = "Today (" + displayDate + ")";
+                else if (i === 1) displayDate = "Tomorrow (" + displayDate + ")";
+
+                let day4Topics = [];
+                let day7Topics = [];
+
+                for (const topic in completedTopics) {
+                    let diffDays = getDaysDiff(targetDateStr, completedTopics[topic]);
+                    if (diffDays === 3) day4Topics.push(topic);
+                    if (diffDays === 6) day7Topics.push(topic);
+                }
+
+                if (day4Topics.length > 0 || day7Topics.length > 0) {
+                    planHtml += `<div class="plan-day">
+                        <div class="plan-date">${displayDate}</div>`;
+                    
+                    if (day4Topics.length > 0) {
+                        planHtml += `<div class="plan-section">
+                            <strong>4th Day Review (Gold Frame):</strong>
+                            <ul>${day4Topics.map(t => `<li>${t}</li>`).join('')}</ul>
+                        </div>`;
+                    }
+                    if (day7Topics.length > 0) {
+                        planHtml += `<div class="plan-section">
+                            <strong>7th Day Review (Green Frame):</strong>
+                            <ul>${day7Topics.map(t => `<li>${t}</li>`).join('')}</ul>
+                        </div>`;
+                    }
+                    planHtml += `</div>`;
+                } else {
+                     planHtml += `<div class="plan-day">
+                        <div class="plan-date">${displayDate}</div>
+                        <div class="empty-state" style="padding: 10px 0; font-size: 13px;">No reviews scheduled.</div>
+                     </div>`;
+                }
+            }
+            planContainer.innerHTML = planHtml;
+            document.getElementById('plan-modal').style.display = 'flex';
+        }
+
+        function closePlanModal() {
+            document.getElementById('plan-modal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('plan-modal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function renderHeatmap() {
+            const wrapper = document.getElementById('heatmap-cols');
+            wrapper.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const allCounts = Object.values(dailyCompletions);
+            const maxCompletions = Math.max(4, ...allCounts.concat(0)); 
+
+            let startGridDate = new Date(today);
+            while(startGridDate.getDay() !== 1) { 
+                startGridDate.setDate(startGridDate.getDate() - 1);
+            }
+
+            let stopGridDate = new Date(startGridDate);
+            stopGridDate.setDate(stopGridDate.getDate() + 364);
+
+            let currentDate = new Date(startGridDate);
+            let currentMonth = -1;
+            let colDiv = null;
+
+            while (currentDate <= stopGridDate) {
+                if (currentDate.getDay() === 1) {
+                    colDiv = document.createElement('div');
+                    colDiv.className = 'heatmap-col';
+                    wrapper.appendChild(colDiv);
+
+                    let monthToPrint = null;
+                    for (let i = 0; i < 7; i++) {
+                        let lookAhead = new Date(currentDate);
+                        lookAhead.setDate(lookAhead.getDate() + i);
+                        if (lookAhead.getDate() === 1) {
+                            monthToPrint = lookAhead.getMonth();
+                            break;
+                        }
+                    }
+                    if (currentDate.getTime() === startGridDate.getTime()) {
+                        monthToPrint = startGridDate.getMonth(); 
+                    }
+                    if (monthToPrint !== null && monthToPrint !== currentMonth) {
+                        const monthLabel = document.createElement('div');
+                        monthLabel.className = 'month-label';
+                        let labelDate = new Date(currentDate.getFullYear(), monthToPrint, 1);
+                        monthLabel.innerText = labelDate.toLocaleString('default', { month: 'short' });
+                        colDiv.appendChild(monthLabel);
+                        currentMonth = monthToPrint;
+                    }
+                }
+
+                const isFuture = currentDate > today;
+                const dateStr = getLocalYMD(currentDate);
+                const count = dailyCompletions[dateStr] || 0;
+
+                const square = document.createElement('div');
+                square.className = 'square';
+                
+                if (isFuture) {
+                    square.style.backgroundColor = 'var(--empty)';
+                    square.setAttribute('data-info', `Future: ${dateStr}`);
+                } else {
+                    if (count === 0) {
+                        square.style.backgroundColor = 'var(--red)';
+                    } else {
+                        const ratio = count / maxCompletions;
+                        if (ratio <= 0.25) square.style.backgroundColor = 'var(--lvl1)';
+                        else if (ratio <= 0.50) square.style.backgroundColor = 'var(--lvl2)';
+                        else if (ratio <= 0.75) square.style.backgroundColor = 'var(--lvl3)';
+                        else square.style.backgroundColor = 'var(--lvl4)';
+                    }
+                    square.setAttribute('data-info', `${count} videos on ${dateStr}`);
+                }
+                colDiv.appendChild(square);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        }
+
+        function updateSubjectProgressBars() {
+            for (const [subject, topics] of Object.entries(CFA_SYLLABUS)) {
+                const total = topics.length;
+                let completedCount = 0;
+                topics.forEach(t => {
+                    if (completedTopics[t]) completedCount++;
+                });
+
+                const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+                const safeId = subject.replace(/\s+/g, '-');
+                const barElement = document.getElementById(`bar-${safeId}`);
+                const pctElement = document.getElementById(`pct-${safeId}`);
+
+                if (barElement && pctElement) {
+                    barElement.style.width = `${pct}%`;
+                    pctElement.innerText = `${pct}%`;
+                    
+                    if (pct === 100) {
+                        barElement.style.backgroundColor = 'var(--lvl4)'; 
+                    } else if (pct > 0) {
+                        barElement.style.backgroundColor = 'var(--blue)'; 
+                    } else {
+                        barElement.style.backgroundColor = 'transparent';
+                    }
+                }
+            }
+        }
+
+        function toggleTopic(topic, isChecked, labelContainer) {
+            const todayStr = getTodayStr();
+
+            if (isChecked) {
+                if (!completedTopics[topic]) completedTopics[topic] = todayStr;
+                dailyCompletions[todayStr] = (dailyCompletions[todayStr] || 0) + 1;
+                if(!reviewStates[topic]) reviewStates[topic] = { day4: false, day7: false };
+            } else {
+                delete completedTopics[topic];
+                delete reviewStates[topic]; 
+                if (dailyCompletions[todayStr] > 0) {
+                    dailyCompletions[todayStr] -= 1;
+                }
+                labelContainer.classList.remove('frame-yellow', 'frame-green');
+            }
+
+            saveState();
+            renderHeatmap();
+            updateSubjectProgressBars();
+
+            const textSpan = labelContainer.querySelector('.topic-name');
+            const infoBtn = labelContainer.querySelector('.info-btn');
+            
+            if (isChecked) {
+                textSpan.classList.add('completed-text');
+                infoBtn.style.display = 'inline-block';
+                infoBtn.setAttribute('data-info', `Completed: ${completedTopics[topic]}`);
+            } else {
+                textSpan.classList.remove('completed-text');
+                infoBtn.style.display = 'none';
+            }
+        }
+
+        function markReviewDone(topic, dayType) {
+            if (reviewStates[topic]) {
+                reviewStates[topic][dayType] = true;
+                saveState();
+                renderTrackerView(); 
+            }
+        }
+
+        function renderTrackerView() {
+            const list4 = document.getElementById('list-day4');
+            const list7 = document.getElementById('list-day7');
+            const badge4 = document.getElementById('badge-day4');
+            const badge7 = document.getElementById('badge-day7');
+
+            list4.innerHTML = '';
+            list7.innerHTML = '';
+
+            let count4 = 0;
+            let count7 = 0;
+            const todayStr = getTodayStr();
+
+            for (const topic in completedTopics) {
+                const diffDays = getDaysDiff(todayStr, completedTopics[topic]);
+                const state = reviewStates[topic] || { day4: false, day7: false };
+
+                if (diffDays >= 3 && !state.day4) {
+                    count4++;
+                    const item = document.createElement('label');
+                    item.className = 'review-item';
+                    item.innerHTML = `<input type="checkbox"> <span>${topic}</span>`;
+                    item.querySelector('input').addEventListener('change', () => markReviewDone(topic, 'day4'));
+                    list4.appendChild(item);
+                }
+                
+                if (diffDays >= 6 && state.day4 && !state.day7) {
+                    count7++;
+                    const item = document.createElement('label');
+                    item.className = 'review-item';
+                    item.innerHTML = `<input type="checkbox"> <span>${topic}</span>`;
+                    item.querySelector('input').addEventListener('change', () => markReviewDone(topic, 'day7'));
+                    list7.appendChild(item);
+                }
+            }
+
+            badge4.innerText = count4;
+            badge7.innerText = count7;
+
+            if (count4 === 0) list4.innerHTML = '<div class="empty-state">All caught up!</div>';
+            if (count7 === 0) list7.innerHTML = '<div class="empty-state">All caught up!</div>';
+        }
+
+        function renderChecklist() {
+            const container = document.getElementById('syllabus-container');
+            container.innerHTML = '';
+
+            for (const [subject, topics] of Object.entries(CFA_SYLLABUS)) {
+                const group = document.createElement('div');
+                group.className = 'subject-group';
+                
+                const safeId = subject.replace(/\s+/g, '-');
+                const titleRow = document.createElement('div');
+                titleRow.className = 'subject-title';
+                
+                titleRow.innerHTML = `
+                    <div class="subject-header-left">
+                        <span>${subject}</span>
+                        <div class="subject-progress-container">
+                            <div class="subject-progress-bar" id="bar-${safeId}"></div>
+                        </div>
+                        <span class="subject-pct" id="pct-${safeId}">0%</span>
+                    </div>
+                    <span class="arrow">▼</span>
+                `;
+                
+                const list = document.createElement('div');
+                list.className = 'topic-list';
+
+                titleRow.addEventListener('click', () => {
+                    list.classList.toggle('active');
+                    const arrow = titleRow.querySelector('.arrow');
+                    arrow.classList.toggle('open');
+                });
+
+                group.appendChild(titleRow);
+
+                topics.forEach(topic => {
+                    const item = document.createElement('label');
+                    item.className = 'topic-item';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    const isCompleted = !!completedTopics[topic];
+                    checkbox.checked = isCompleted;
+                    
+                    const textSpan = document.createElement('span');
+                    textSpan.className = 'topic-name';
+                    textSpan.innerText = topic;
+
+                    const infoBtn = document.createElement('span');
+                    infoBtn.className = 'info-btn';
+                    infoBtn.innerText = 'ⓘ';
+                    
+                    infoBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    });
+                    
+                    if (isCompleted) {
+                        textSpan.classList.add('completed-text');
+                        infoBtn.style.display = 'inline-block';
+                        infoBtn.setAttribute('data-info', `Completed: ${completedTopics[topic]}`);
+                        
+                        const state = reviewStates[topic];
+                        if (state) {
+                            if (state.day7) {
+                                item.classList.add('frame-green');
+                            } else if (state.day4) {
+                                item.classList.add('frame-yellow');
+                            }
+                        }
+                    }
+                    
+                    checkbox.addEventListener('change', (e) => toggleTopic(topic, e.target.checked, item));
+
+                    item.appendChild(checkbox);
+                    item.appendChild(textSpan);
+                    item.appendChild(infoBtn);
+                    list.appendChild(item);
+                });
+
+                group.appendChild(list);
+                container.appendChild(group);
+            }
+        }
+
+        renderHeatmap();
+        renderChecklist(); 
+        updateSubjectProgressBars();
+        renderTrackerView(); 
+    </script>
+</body>
+</html>
