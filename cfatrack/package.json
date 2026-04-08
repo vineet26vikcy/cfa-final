@@ -1,0 +1,21 @@
+{
+  "name": "cfa-console",
+  "version": "1.0.0",
+  "description": "CFA Console - Track your CFA study progress",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'No build step required for static HTML'",
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.0.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "cfa",
+    "study-tracker",
+    "analytics"
+  ],
+  "author": "",
+  "license": "ISC"
+}
