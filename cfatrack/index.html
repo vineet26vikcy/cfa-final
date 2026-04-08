@@ -45,10 +45,10 @@
             --modal-overlay: rgba(0,0,0,0.8);
         }
 
-        /* Dark mode filter for the logo if it has a white background */
+        /* Dark mode filter for the logo */
         body.dark-theme .logo-img {
             filter: brightness(0.9) contrast(1.2);
-            background-color: white; /* Keeps logo legible if it has dark text */
+            background-color: white; 
             border-radius: 4px;
             padding: 2px;
         }
@@ -424,6 +424,73 @@
             font-style: italic;
         }
 
+        /* Analytics View Styles */
+        #analytics-view {
+            display: none;
+        }
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .analytics-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            background-color: var(--bg-light);
+        }
+        .analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .analytics-header span:first-child {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+        .weightage-badge {
+            font-size: 12px;
+            background-color: var(--border);
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+        .analytics-bar-bg {
+            height: 10px;
+            background-color: var(--empty);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .analytics-bar-fill {
+            height: 100%;
+            transition: width 0.4s ease, background-color 0.4s ease;
+        }
+        .analytics-pct {
+            font-size: 13px;
+            text-align: right;
+            font-weight: 600;
+        }
+        .danger-btn {
+            background-color: var(--bg-main);
+            color: var(--red);
+            border: 1px solid var(--red);
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .danger-btn:hover {
+            background-color: var(--red);
+            color: white;
+        }
+
         /* Button & Modal Styles */
         .plan-btn {
             background-color: var(--blue);
@@ -556,9 +623,10 @@
                 flex-direction: column;
                 align-items: stretch;
             }
-            .plan-btn {
+            .plan-btn, .danger-btn {
                 width: 100%;
                 text-align: center;
+                margin-top: 10px;
             }
         }
     </style>
@@ -583,13 +651,13 @@
         <div class="nav-links">
             <span class="active" id="nav-dashboard">Dashboard</span>
             <span id="nav-tracker">1-4-7 Rule</span>
-            <span>Analytics</span>
+            <span id="nav-analytics">Analytics</span>
         </div>
     </div>
 
     <div class="container" id="dashboard-view">
         <div class="page-title" style="margin-bottom: 30px;">
-            <img src="download (5).png" alt="CFA Logo" class="logo-img"> 
+            <img src="logo.png" alt="CFA Logo" class="logo-img" onerror="this.style.display='none'"> 
             CFA Progress Tracker
         </div>
 
@@ -656,6 +724,22 @@
         </div>
     </div>
 
+    <div class="container" id="analytics-view">
+        <div class="page-header">
+            <div>
+                <h1 class="page-title" style="margin-bottom: 5px;">
+                    📈 Exam Analytics
+                </h1>
+                <p style="color: var(--text-light); font-size: 13px; margin: 0; line-height: 1.4;">
+                    Track your topic readiness against official CFA Level 1 exam weights.
+                </p>
+            </div>
+            <button class="danger-btn" onclick="resetProgress()">⚠️ Reset Progress</button>
+        </div>
+        <div class="analytics-grid" id="analytics-content">
+            </div>
+    </div>
+
     <div class="modal-overlay" id="plan-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -669,69 +753,191 @@
 
     <script>
         const CFA_SYLLABUS = {
-            "Quants": [
-                "1.0 - Time Value of Money", "1.1 - Rates and Returns", 
-                "1.2 - TVM for Finance", "1.3 - PreRequisites", 
-                "1.4 - Probability", "1.5 - Portfolio Mathematics",
-                "1.6 - Probability Distributions", "1.7 - Simulation Methods",
-                "1.8 - Estimation Inference", "1.9 - Hypothesis Testing",
-                "1.9B - Linear Regression", "1.9C - Intro to Big Data"
-            ],
-            "FSA": [
-                "2.0 - Intro to FSA", "2.1 - Analyzing Income Statement", 
-                "2.2 - Analyzing Balance Sheet", "2.3 - Analyzing Cash Flow", 
-                "2.5 - Analysis of Inventories", "2.6 - Analysis of Long Term Assets",
-                "2.7 - Long Term Liabilities & Equity", "2.8 - Income Tax",
-                "2.9 - Financial Reporting Quality", "2.9A - Financial Analysis Techniques",
-                "2.9B - Intro to Financial Modeling"
-            ],
-            "Corporate Issuers": [
-                "3.1 - Organizational Structure", "3.2 - Investors and Stakeholders", 
-                "3.3 - Corporate Governance", "3.4 - Working Capital and Liquidity",
-                "3.5 - Capital Invt and Allocation", "3.6 - Capital Structure",
-                "3.7 - Business Model"
-            ],
-            "Alternative Investments": [
-                "4.1 - Features, Methods, Structure", "4.2 - Performance and Returns", 
-                "4.3 - Invt in Private Debt and Equity", "4.4 - Real Estate and Infra",
-                "4.5 - Natural Resources", "4.6 - Hedge Funds", "4.7 - Digital Assets"
+            "Quantitative Methods": [
+                "R1 M1.1: Interest Rates and Return Measurement",
+                "R1 M1.2: Time-Weighted and Money-Weighted Returns",
+                "R1 M1.3: Common Measures of Return",
+                "R2 M2.1: Discounted Cash Flow Valuation",
+                "R2 M2.2: Implied Returns and Cash Flow Additivity",
+                "R3 M3.1: Central Tendency and Dispersion",
+                "R3 M3.2: Skewness, Kurtosis, and Correlation",
+                "R4 M4.1: Probability Models, Expected Values, and Bayes’ Formula",
+                "R5 M5.1: Probability Models for Portfolio Return and Risk",
+                "R6 M6.1: Lognormal Distributions and Simulation Techniques",
+                "R7 M7.1: Sampling Techniques and the Central Limit Theorem",
+                "R8 M8.1: Hypothesis Testing Basics",
+                "R8 M8.2: Types of Hypothesis Tests",
+                "R9 M9.1: Tests for Independence",
+                "R10 M10.1: Linear Regression Basics",
+                "R10 M10.2: Analysis of Variance (ANOVA) and Goodness of Fit",
+                "R10 M10.3: Predicted Values and Functional Forms of Regression",
+                "R11 M11.1: Introduction to Fintech"
             ],
             "Economics": [
-                "5.0 - Micro Prerequisites", "5.1 - Firm Structure and Markets", 
-                "5.2 - Macro Prerequisites", "5.3 - Business Cycles",
-                "5.4 - Fiscal Policy", "5.5 - Monetary Policy", "5.6 - Intro to Geopolitics",
-                "5.7 - International Trade and FX", "5.8 - Capital Flow and FX"
+                "R12 M12.1: Breakeven, Shutdown, and Scale",
+                "R12 M12.2: Characteristics of Market Structures",
+                "R12 M12.3: Identifying Market Structures",
+                "R13 M13.1: Business Cycles",
+                "R14 M14.1: Fiscal Policy Objectives",
+                "R14 M14.2: Fiscal Policy Tools and Implementation",
+                "R15 M15.1: Central Bank Objectives and Tools",
+                "R15 M15.2: Monetary Policy Effects and Limitations",
+                "R16 M16.1: Geopolitics",
+                "R17 M17.1: International Trade",
+                "R18 M18.1: The Foreign Exchange Market",
+                "R18 M18.2: Managing Exchange Rates",
+                "R19 M19.1: Foreign Exchange Rates"
+            ],
+            "Corporate Issuers": [
+                "R20 M20.1: Features of Corporate Issuers",
+                "R21 M21.1: Stakeholders and ESG Factors",
+                "R22 M22.1: Corporate Governance",
+                "R23 M23.1: Liquidity Measures and Management",
+                "R24 M24.1: Capital Investments and Project Measures",
+                "R24 M24.2: Capital Allocation Principles and Real Options",
+                "R25 M25.1: Weighted-Average Cost of Capital",
+                "R25 M25.2: Capital Structure Theories",
+                "R26 M26.1: Business Model Features and Types"
+            ],
+            "Financial Statement Analysis": [
+                "R27 M27.1: Financial Statement Roles",
+                "R28 M28.1: Revenue Recognition",
+                "R28 M28.2: Expense Recognition",
+                "R28 M28.3: Nonrecurring Items",
+                "R28 M28.4: Earnings Per Share",
+                "R28 M28.5: Ratios and Common-Size Income Statements",
+                "R29 M29.1: Intangible Assets and Marketable Securities",
+                "R29 M29.2: Common-Size Balance Sheets",
+                "R30 M30.1: Cash Flow Introduction and Direct Method CFO",
+                "R30 M30.2: Indirect Method CFO",
+                "R30 M30.3: Investing and Financing Cash Flows and IFRS / U.S. GAAP Differences",
+                "R31 M31.1: Analyzing Statements of Cash Flows II",
+                "R32 M32.1: Inventory Measurement",
+                "R32 M32.2: Inflation Impact on FIFO and LIFO",
+                "R32 M32.3: Presentation and Disclosure",
+                "R33 M33.1: Intangible Long-Lived Assets",
+                "R33 M33.2: Impairment and Derecognition",
+                "R33 M33.3: Long-Term Asset Disclosures",
+                "R34 M34.1: Leases",
+                "R34 M34.2: Deferred Compensation and Disclosures",
+                "R35 M35.1: Differences Between Accounting Profit and Taxable Income",
+                "R35 M35.2: Deferred Tax Assets and Liabilities",
+                "R35 M35.3: Tax Rates and Disclosures",
+                "R36 M36.1: Reporting Quality",
+                "R36 M36.2: Accounting Choices and Estimates",
+                "R36 M36.3: Warning Signs",
+                "R37 M37.1: Introduction to Financial Ratios",
+                "R37 M37.2: Financial Ratios Part 1",
+                "R37 M37.3: Financial Ratios Part 2",
+                "R37 M37.4: DuPont Analysis",
+                "R37 M37.5: Industry-Specific Financial Ratios",
+                "R38 M38.1: Financial Statement Modeling"
             ],
             "Equity Investments": [
-                "6.1 - Mkt Organization and Structure", "6.2 - Index Securities", 
-                "6.3 - Market Efficiency", "6.4 - Overview of Equities",
-                "6.5 - Company Analysis", "6.6 - Industry Analysis", "6.7 - Forecasting",
-                "6.8 - Valuation Concepts and Tools"
-            ],
-            "Portfolio Management": [
-                "7.1 - Risk and Returns - One", "7.2 - Risk and Returns - Two",
-                "7.3 - Portfolio Mgmt Overview", "7.4 - Basic Portfolio Planning",
-                "7.5 - Behavioural Biases", "7.6 - Intro to Risk Mgmt"
+                "R39 M39.1: Markets, Assets, and Intermediaries",
+                "R39 M39.2: Positions and Leverage",
+                "R39 M39.3: Order Execution and Validity",
+                "R40 M40.1: Index Weighting Methods",
+                "R40 M40.2: Uses and Types of Indexes",
+                "R41 M41.1: Market Efficiency",
+                "R42 M42.1: Types of Equity Investments",
+                "R42 M42.2: Foreign Equities and Equity Risk",
+                "R43 M43.1: Company Research Reports",
+                "R43 M43.2: Revenue, Profitability, and Capital",
+                "R44 M44.1: Industry Analysis",
+                "R44 M44.2: Industry Structure and Competitive Positioning",
+                "R45 M45.1: Forecasting in Company Analysis",
+                "R46 M46.1: Dividends, Splits, and Repurchases",
+                "R46 M46.2: Dividend Discount Models",
+                "R46 M46.3: Relative Valuation Measures"
             ],
             "Fixed Income": [
-                "8.1 - Fixed Income Instruments", "8.2 - Fixed Income CF and Types",
-                "8.3 - Trading and Issuance", "8.4 - Fixed Income - Pvt Issuers",
-                "8.5 - Fixed Income Govt Issuers", "8.6 - FI Valuation - Yield and Price",
-                "8.7 - Yield and Spread Measures", "8.8 - Term Structure Yield Curve",
-                "8.9 - Interest Rate Risk and Return", "8.9a - Yield Based Duration",
-                "8.9b - Curve Based Measures", "8.9c - Credit Risk", "8.9g - Securitization"
+                "R47 M47.1: Fixed-Income Instrument Features",
+                "R48 M48.1: Fixed-Income Cash Flows and Types",
+                "R49 M49.1: Fixed-Income Issuance and Trading",
+                "R50 M50.1: Fixed-Income Markets for Corporate Issuers",
+                "R51 M51.1: Fixed-Income Markets for Government Issuers",
+                "R52 M52.1: Fixed-Income Bond Valuation: Prices and Yields",
+                "R53 M53.1: Yield and Yield Spread Measures for Fixed-Rate Bonds",
+                "R54 M54.1: Yield and Yield Spread Measures for Floating-Rate Instruments",
+                "R55 M55.1: Term Structure of Interest Rates",
+                "R56 M56.1: Interest Rate Risk and Return",
+                "R57 M57.1: Duration Measures and Properties",
+                "R58 M58.1: Convexity and Portfolio Properties",
+                "R59 M59.1: Fixed-Income Risk Measures",
+                "R60 M60.1: Credit Risk",
+                "R61 M61.1: Government Credit Analysis",
+                "R62 M62.1: Corporate Credit Analysis",
+                "R63 M63.1: Securitization",
+                "R64 M64.1: ABS Instruments and Market Features",
+                "R65 M65.1: MBS Instruments and Market Features"
             ],
             "Derivatives": [
-                "9.0 - Intro to Derivatives", "9.1 - Derivatives Instruments",
-                "9.2 - Fwd Commitment and Contingent Claim", "9.3 - Derivatives Features",
-                "9.4 - Derivative Arbitrage", "9.5 - Pricing Fwd",
-                "9.6 - Value & Pricing Futures", "9.7 - Value & Pricing Swaps",
-                "9.8 - Value & Pricing Options", "9.9 - Option Replication PCP"
+                "R66 M66.1: Derivatives Markets",
+                "R67 M67.1: Forwards and Futures",
+                "R67 M67.2: Swaps and Options",
+                "R68 M68.1: Uses, Benefits, and Risks of Derivatives",
+                "R69 M69.1: Arbitrage and Carrying Costs",
+                "R70 M70.1: Forward Contract Valuation",
+                "R71 M71.1: Futures Valuation",
+                "R72 M72.1: Swap Valuation",
+                "R73 M73.1: Option Valuation",
+                "R74 M74.1: Put-Call Parity",
+                "R75 M75.1: Binomial Model for Option Valuation"
+            ],
+            "Alternative Investments": [
+                "R76 M76.1: Alternative Investment Structures",
+                "R77 M77.1: Performance Appraisal and Return Calculations",
+                "R78 M78.1: Private Capital",
+                "R79 M79.1: Real Estate",
+                "R79 M79.2: Infrastructure",
+                "R80 M80.1: Farmland, Timberland, and Commodities",
+                "R81 M81.1: Hedge Funds",
+                "R82 M82.1: Distributed Ledger Technology",
+                "R82 M82.2: Digital Asset Characteristics"
+            ],
+            "Portfolio Management": [
+                "R83 M83.1: Historical Risk and Return",
+                "R83 M83.2: Risk Aversion",
+                "R83 M83.3: Portfolio Standard Deviation",
+                "R83 M83.4: Efficient Frontier",
+                "R84 M84.1: Systematic Risk and Beta",
+                "R84 M84.2: CAPM and SML",
+                "R85 M85.1: Portfolio Management Process",
+                "R85 M85.2: Asset Management and Pooled Investments",
+                "R86 M86.1: Portfolio Planning and Construction",
+                "R87 M87.1: Cognitive Errors vs Emotional Biases",
+                "R87 M87.2: Emotional Biases",
+                "R88 M88.1: Risk Management"
             ],
             "Ethics": [
-                "10.1 - Ethics and Trust", "10.2 - Code and Standards",
-                "10.3 - Standards", "10.4 - GIPS"
+                "R89 M89.1: Ethics and Trust",
+                "R90 M90.1: Code and Standards",
+                "R91 M91.1: Standards I(A), I(B)",
+                "R91 M91.2: Standards I(C), I(D), I(E)",
+                "R91 M91.3: Standard II",
+                "R91 M91.4: Standards III(A), III(B)",
+                "R91 M91.5: Standards III(C), III(D), III(E)",
+                "R91 M91.6: Standard IV",
+                "R91 M91.7: Standard V",
+                "R91 M91.8: Standard VI",
+                "R91 M91.9: Standard VII",
+                "R92 M92.1: Introduction to GIPS",
+                "R93 M93.1: Ethics Application"
             ]
+        };
+
+        const CFA_WEIGHTAGES = {
+            "Ethics": "15–20%",
+            "Quantitative Methods": "6–9%",
+            "Economics": "6–9%",
+            "Financial Statement Analysis": "11–14%",
+            "Corporate Issuers": "6–9%",
+            "Equity Investments": "11–14%",
+            "Fixed Income": "11–14%",
+            "Derivatives": "5–8%",
+            "Alternative Investments": "7–10%",
+            "Portfolio Management": "8–12%"
         };
 
         // Dark Theme Logic
@@ -751,23 +957,39 @@
         // UI Navigation Logic
         const navDashboard = document.getElementById('nav-dashboard');
         const navTracker = document.getElementById('nav-tracker');
+        const navAnalytics = document.getElementById('nav-analytics');
         const viewDashboard = document.getElementById('dashboard-view');
         const viewTracker = document.getElementById('tracker-view');
+        const viewAnalytics = document.getElementById('analytics-view');
 
         navDashboard.addEventListener('click', () => {
             navDashboard.classList.add('active');
             navTracker.classList.remove('active');
+            navAnalytics.classList.remove('active');
             viewDashboard.style.display = 'block';
             viewTracker.style.display = 'none';
+            viewAnalytics.style.display = 'none';
             renderChecklist(); 
         });
 
         navTracker.addEventListener('click', () => {
             navTracker.classList.add('active');
             navDashboard.classList.remove('active');
+            navAnalytics.classList.remove('active');
             viewTracker.style.display = 'block';
             viewDashboard.style.display = 'none';
+            viewAnalytics.style.display = 'none';
             renderTrackerView(); 
+        });
+
+        navAnalytics.addEventListener('click', () => {
+            navAnalytics.classList.add('active');
+            navDashboard.classList.remove('active');
+            navTracker.classList.remove('active');
+            viewAnalytics.style.display = 'block';
+            viewDashboard.style.display = 'none';
+            viewTracker.style.display = 'none';
+            renderAnalytics();
         });
 
         function getLocalYMD(dateObj) {
@@ -795,6 +1017,24 @@
             localStorage.setItem('cfa_daily_completions', JSON.stringify(dailyCompletions));
             localStorage.setItem('cfa_completed_topics', JSON.stringify(completedTopics));
             localStorage.setItem('cfa_review_states', JSON.stringify(reviewStates));
+        }
+
+        function resetProgress() {
+            const confirmed = window.confirm("🚨 WARNING 🚨\n\nAre you sure you want to completely erase all your CFA progress? \n\nThis action cannot be undone.");
+            if (confirmed) {
+                localStorage.removeItem('cfa_daily_completions');
+                localStorage.removeItem('cfa_completed_topics');
+                localStorage.removeItem('cfa_review_states');
+                dailyCompletions = {};
+                completedTopics = {};
+                reviewStates = {};
+                
+                renderHeatmap();
+                renderChecklist();
+                updateSubjectProgressBars();
+                renderTrackerView();
+                renderAnalytics();
+            }
         }
 
         // Generate Plan Till Sunday
@@ -989,6 +1229,7 @@
             saveState();
             renderHeatmap();
             updateSubjectProgressBars();
+            if(navAnalytics.classList.contains('active')) renderAnalytics();
 
             const textSpan = labelContainer.querySelector('.topic-name');
             const infoBtn = labelContainer.querySelector('.info-btn');
@@ -1138,10 +1379,43 @@
             }
         }
 
+        function renderAnalytics() {
+            const container = document.getElementById('analytics-content');
+            container.innerHTML = '';
+
+            for (const [subject, topics] of Object.entries(CFA_SYLLABUS)) {
+                const total = topics.length;
+                let completedCount = 0;
+                topics.forEach(t => { if (completedTopics[t]) completedCount++; });
+                
+                const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+                const weight = CFA_WEIGHTAGES[subject] || "N/A";
+                
+                // Color Logic: Red until 50%, then turns Green
+                const barColor = pct >= 50 ? 'var(--lvl3)' : 'var(--red)';
+
+                const card = document.createElement('div');
+                card.className = 'analytics-card';
+                card.innerHTML = `
+                    <div class="analytics-header">
+                        <span>${subject}</span>
+                        <span class="weightage-badge">Weight: ${weight}</span>
+                    </div>
+                    <div class="analytics-bar-bg">
+                        <div class="analytics-bar-fill" style="width: ${pct}%; background-color: ${barColor};"></div>
+                    </div>
+                    <div class="analytics-pct" style="color: ${barColor};">${pct}% Completed</div>
+                `;
+                container.appendChild(card);
+            }
+        }
+
+        // INITIALIZATION
         renderHeatmap();
         renderChecklist(); 
         updateSubjectProgressBars();
         renderTrackerView(); 
+        renderAnalytics();
     </script>
 </body>
 </html>
